@@ -2,10 +2,11 @@
 set -euo pipefail
 
 usage() {
-  cat <<'EOF'
+  local cmd="${0#./}"
+  cat <<EOF
 Usage:
-  tools/fork-sync.sh [--main-only]
-  tools/fork-sync.sh --branch <branch> [--base <ref>] [--push]
+  ${cmd} [--main-only]
+  ${cmd} --branch <branch> [--base <ref>] [--push]
 
 What it does:
   1. Fetch origin and upstream.
@@ -19,9 +20,9 @@ Defaults:
   - Use --push to push the rebased branch with --force-with-lease.
 
 Examples:
-  tools/fork-sync.sh --main-only
-  tools/fork-sync.sh --branch codex/fork-tooling --base main --push
-  tools/fork-sync.sh --branch codex/work/thread-id-isolation --base codex/fork-tooling --push
+  ${cmd} --main-only
+  ${cmd} --branch codex/fork-tooling --base main --push
+  ${cmd} --branch codex/work/thread-id-isolation --base main --push
 EOF
 }
 

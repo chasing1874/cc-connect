@@ -13,7 +13,7 @@
 
 - `main`: 镜像 `upstream/main`。不在这里写任何自定义 commit。
 - `codex/fork-tooling`: fork 专用脚本和规范。只放不打算提交给上游的维护文件。
-- `codex/work/<topic>`: 自用功能分支。可以叠加 fork tooling 和临时 patch，优先保证自己可用。
+- `codex/work/<topic>`: 自用功能分支。从 `main` 出发，只放真实功能 patch；不要合入 fork tooling，避免手滑开 PR 时把维护文件带上。
 - `codex/pr/<topic>`: 上游 PR 分支。必须从干净的 `main` 切出，只包含准备提交给上游的最小改动。
 
 当前建议主题名：
@@ -23,10 +23,18 @@
 
 ## Sync Routine
 
+推荐先把同步脚本安装到本地 ignored 路径。仓库根目录的 `scripts/` 已被上游 `.gitignore` 忽略，因此不会进入 PR：
+
+```bash
+mkdir -p scripts
+cp tools/fork-sync.sh scripts/fork-sync.sh
+chmod +x scripts/fork-sync.sh
+```
+
 只同步镜像 main：
 
 ```bash
-tools/fork-sync.sh --main-only
+scripts/fork-sync.sh --main-only
 ```
 
 同步 fork tooling：
@@ -38,7 +46,7 @@ tools/fork-sync.sh --branch codex/fork-tooling --base main --push
 同步自用 patch 分支：
 
 ```bash
-tools/fork-sync.sh --branch codex/work/thread-id-isolation --base codex/fork-tooling --push
+scripts/fork-sync.sh --branch codex/work/thread-id-isolation --base main --push
 ```
 
 `git rerere` 已启用。解决过的同类冲突会被 Git 记录，后续 rebase 时会尽量自动复用。
@@ -89,7 +97,7 @@ thread_isolation_mode = "root"       # default, current behavior
 
 ## Conflict Policy
 
-- 开始写代码前先运行 `tools/fork-sync.sh --main-only`。
+- 开始写代码前先运行 `scripts/fork-sync.sh --main-only`。
 - 自用分支每天或每次改动前 rebase 一次。
 - PR 分支尽量晚创建，或者每次从最新 main 重新 cherry-pick。
 - 如果同一个文件冲突反复出现，优先把我们的改动收缩成更小的 helper 或更靠近原逻辑的小 hunk。
